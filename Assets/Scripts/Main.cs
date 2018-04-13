@@ -5,7 +5,8 @@ using UnityEngine;
 public class Main : MonoBehaviour {
 
     public static Main instance;
-    List<Human> human_list;
+    List<GameObject> human_list;
+    public GameObject human_prefeb;
 
     private void Awake()
     {
@@ -20,9 +21,11 @@ public class Main : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        human_list = new List<Human>();
-        Human human = new Human();
-        human_list.Add(human);
+
+        human_list = new List<GameObject>();
+        //assume only one human
+        human_list.Add(Instantiate(human_prefeb)as GameObject);
+
     }
 	
 	// Update is called once per frame
@@ -32,11 +35,12 @@ public class Main : MonoBehaviour {
 
     public void udpateJointsData(JointData[] jointsData)
     {
-        human_list[0].udpateJointsData2D(jointsData);
+        human_list[0].GetComponent<Human>().udpateJointsData2D(jointsData);
+        udpateHumanPose();
     }
 
     public void udpateHumanPose()
     {
-        human_list[0].udpateHumanPose();
+        human_list[0].GetComponent<Human>().udpateHumanPose();
     }
 }

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class BoneDrawer : MonoBehaviour {
 
+    public const int limbs_count = 13;
     public Transform[] start_trans;
     public Transform[] end_trans;
     public LineRenderer[] lines;
@@ -21,6 +22,7 @@ public class BoneDrawer : MonoBehaviour {
 
     public void update_drawer()
     {
+ 
         for (int i = 0; i < lines.Length; i++)
         {
             lines[i].SetPosition(0, start_trans[i].position);

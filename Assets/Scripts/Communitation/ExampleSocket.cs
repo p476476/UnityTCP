@@ -102,11 +102,17 @@ public class ExampleSocket : MonoBehaviour {
                     Debug.Log("jdata.data=" + jdata.data);
                     string fixedData = "{\"Items\":" + jdata.data + "}";
                     JointData[] jointDatas = JsonHelper.FromJson<JointData>(fixedData);
-                    foreach (JointData jointData in jointDatas)
+                    /*
+                     * Log 接收到的資料
+                     * foreach (JointData jointData in jointDatas)
                     {
                         textLogController.LogText(jointData.getString());
                     }
-                        
+                    */
+
+                    Main.instance.udpateJointsData(jointDatas);
+
+
                 }
                 else
                 {

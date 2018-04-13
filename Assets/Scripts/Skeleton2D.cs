@@ -21,10 +21,17 @@ public class Skeleton2D {
 
     public void udpateData(JointData[] jointData)
     {
-        for(int i=0;i<jointData.Length;i++)
+        //joint id in open pose. [nose, neck, Rsho, Relb, Rwri, Lsho, Lelb, Lwri, Rhip, Rkne, Rank, Lhip, Lkne, Lank, Leye, Reye, Lear, Rear, pt19]
+        //joint id in unity.     [head, neck, Rsho, Relb, Rwri, Lsho, Lelb, Lwri, Rhip, Rkne, Rank, Lhip, Lkne, Lank]
+       
+
+        for (int i=0;i<jointData.Length;i++)
         {
             int j_num = (int)jointData[i].joint_number;
-            joint_position[j_num].Set(joint_position[j_num].x, joint_position[j_num].y,0);
+            if (j_num <= 13)
+            {
+                joint_position[j_num].Set(joint_position[j_num].x, joint_position[j_num].y, 0);
+            }
         }
     }
 
