@@ -26,11 +26,7 @@ public class ExampleSocket : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            JointData[] jd = new JointData[2];
-            jd[0] = new JointData(1, 2, 3, 4, 5);
-            jd[1] = new JointData(1, 2, 3, 4, 5);
-            string json = JsonHelper.ToJson<JointData>(jd,true);
-            Debug.Log(json);
+
         }
     }
 
@@ -97,28 +93,22 @@ public class ExampleSocket : MonoBehaviour {
         switch(jdata.cmd)
         {
             case "say":
-                if(jdata.name=="track")
+                textLogController.LogText(jdata.name + "說:" + jdata.data);
+                break;
+            case "track":
+                if (jdata.name == "track00" || jdata.name == "track01")
                 {
-                    Debug.Log("jdata.data=" + jdata.data);
                     string fixedData = "{\"Items\":" + jdata.data + "}";
                     JointData[] jointDatas = JsonHelper.FromJson<JointData>(fixedData);
-                    /*
-                     * Log 接收到的資料
-                     * foreach (JointData jointData in jointDatas)
-                    {
-                        textLogController.LogText(jointData.getString());
-                    }
-                    */
 
-                    Main.instance.udpateJointsData(jointDatas);
+                    textLogController.LogText(jdata.name + "更新DATA");
 
-
+                    Main.instance.udpateJointsData(Main.instance.track_data_index[jdata.name], jointDatas);
                 }
                 else
                 {
-                    textLogController.LogText(jdata.name + "說:" + jdata.data);
+                    textLogController.LogText("Undefine tracker:"+jdata.name );
                 }
-                
                 break;
             case "disconnect accept":
                 ready_to_disconnect = true;
