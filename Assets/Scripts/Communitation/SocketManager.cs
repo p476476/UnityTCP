@@ -11,7 +11,7 @@ using UnityEngine.UI;
 public class SocketManager {
 
     private Socket _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-    private byte[] _recieveBuffer = new byte[2048];
+    private byte[] _recieveBuffer = new byte[16384];
     public List<string> recieveData = new List<string>();
 
     /// 
@@ -21,6 +21,7 @@ public class SocketManager {
     {
         try
         {
+
             _clientSocket.Connect(new IPEndPoint(IPAddress.Parse(IP), Port));
         }
         catch (SocketException ex)

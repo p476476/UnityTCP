@@ -11,9 +11,23 @@ public class ExampleSocket : MonoBehaviour {
     public InputField input_box;
     string username = "pohong";
 
+    public Text uitxt_sever_ip;
+    public Text uitxt_sever_port;
+    public Text uitxt_username;
+
     bool ready_to_disconnect = false;
     [SerializeField]
     private TextLogController textLogController;
+
+    
+    
+
+    public void Start()
+    {
+        server_ip = uitxt_sever_ip.text;
+        server_port = int.Parse(uitxt_sever_port.text);
+        mSocketMgr = new SocketManager();
+    }
 
     public void Update()
     {
@@ -26,7 +40,11 @@ public class ExampleSocket : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-
+            JsonData jdata = new JsonData();
+            jdata.cmd = "add group";
+            jdata.name = username;
+            jdata.data = "get track data";
+            mSocketMgr.SendServer(getJsonString(jdata));
         }
     }
 
@@ -45,13 +63,11 @@ public class ExampleSocket : MonoBehaviour {
         server_port = int.Parse(port);
     }
 
-    void Start()
-    {
-        mSocketMgr = new SocketManager();
-    }
 
     public void OnClickConnect()
     {
+        print(server_ip);
+        print(server_port);
         bool state = mSocketMgr.Connect(server_ip, server_port);
         if (state == true)
         {
@@ -61,6 +77,8 @@ public class ExampleSocket : MonoBehaviour {
             jdata.name = username;
             jdata.data = "";
             mSocketMgr.SendServer(getJsonString(jdata));
+
+            
         }
         else
             textLogController.LogText("無法連接至SERVER");
@@ -89,32 +107,66 @@ public class ExampleSocket : MonoBehaviour {
 
     private void handleRecvMsg(string str)
     {
-        JsonData jdata = JsonUtility.FromJson<JsonData>(str);
-        switch(jdata.cmd)
+        //spilit cmds
+        List<string> strs = new List<string>();
+        while (true)
         {
-            case "say":
-                textLogController.LogText(jdata.name + "說:" + jdata.data);
+            int multi_str = str.IndexOf("{\"cmd\":", 9);
+            if (multi_str != -1)
+            {
+                strs.Add(str.Substring(0, multi_str));
+                str = str.Substring(multi_str);
+            }else
+            {
+                strs.Add(str);
                 break;
-            case "track":
-                if (jdata.name == "track00" || jdata.name == "track01")
-                {
-                    string fixedData = "{\"Items\":" + jdata.data + "}";
-                    JointData[] jointDatas = JsonHelper.FromJson<JointData>(fixedData);
-
-                    textLogController.LogText(jdata.name + "更新DATA");
-
-                    Main.instance.udpateJointsData(Main.instance.track_data_index[jdata.name], jointDatas);
-                }
-                else
-                {
-                    textLogController.LogText("Undefine tracker:"+jdata.name );
-                }
-                break;
-            case "disconnect accept":
-                ready_to_disconnect = true;
-                break;
-                    
+            }
         }
+
+        //each string do
+        foreach (string s in strs)
+        {
+            JsonData jdata;
+            print("JOSN:"+s);
+            try
+            {
+                jdata = JsonUtility.FromJson<JsonData>(s);
+            }
+            catch
+            {
+                print("ERROR Json input");
+                continue;
+            }
+
+                
+
+            switch (jdata.cmd)
+            {
+                case "say":
+                    textLogController.LogText(jdata.name + "說:" + jdata.data);
+                    break;
+                case "track":
+                    if (jdata.name == "track00" || jdata.name == "track01")
+                    {
+                        string fixedData = "{\"Items\":" + jdata.data + "}";
+                        JointData[] jointDatas = JsonHelper.FromJson<JointData>(fixedData);
+
+                        textLogController.LogText(jdata.name + "更新DATA");
+
+                        Main.instance.udpateJointsData(Main.instance.track_data_index[jdata.name], jointDatas);
+                    }
+                    else
+                    {
+                        textLogController.LogText("Undefine tracker:" + jdata.name);
+                    }
+                    break;
+                case "disconnect accept":
+                    ready_to_disconnect = true;
+                    break;
+
+            }
+        }
+        
         
     }
     public void OnClickClose()
