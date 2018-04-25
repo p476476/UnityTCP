@@ -153,7 +153,22 @@ public class ExampleSocket : MonoBehaviour {
 
                         textLogController.LogText(jdata.name + "更新DATA");
 
-                        Main.instance.udpateJointsData(Main.instance.track_data_index[jdata.name], jointDatas);
+                        Main.instance.updateJointsData(Main.instance.track_data_index[jdata.name], jointDatas);
+                    }
+                    else
+                    {
+                        textLogController.LogText("Undefine tracker:" + jdata.name);
+                    }
+                    break;
+                case "track_depth":
+                    if (jdata.name == "track00" || jdata.name == "track01")
+                    {
+                        string fixedData = "{\"Items\":" + jdata.data + "}";
+                        JointDepthData[] jointDatas = JsonHelper.FromJson<JointDepthData>(fixedData);
+
+                        textLogController.LogText(jdata.name + "更新 DEPTH DATA");
+
+                        Main.instance.updateDepthData(Main.instance.track_data_index[jdata.name], jointDatas);
                     }
                     else
                     {
@@ -200,4 +215,5 @@ public class ExampleSocket : MonoBehaviour {
         string json = JsonUtility.ToJson(jdata);
         return json;
     }
+
 }

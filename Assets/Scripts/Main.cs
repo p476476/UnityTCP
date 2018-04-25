@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Main : MonoBehaviour {
 
@@ -9,6 +10,8 @@ public class Main : MonoBehaviour {
 
     public List<GameObject> human_list;
     public GameObject human_prefeb;
+
+    public Slider test_slider;
 
     public Dictionary<string, int> track_data_index = new Dictionary<string, int>();
 
@@ -40,15 +43,27 @@ public class Main : MonoBehaviour {
 		
 	}
 
-    public void udpateJointsData(int camera_number,JointData[] jointsData)
+    public void updateJointsData(int camera_number,JointData[] jointsData)
     {
 
-        human_list[0].GetComponent<Human>().udpateJointsData2D(camera_number, jointsData);
+        human_list[0].GetComponent<Human>().updateJointsData2D(camera_number, jointsData);
         udpateHumanPose();
+    }
+    public void updateDepthData(int camera_number, JointDepthData[] depthData)
+    {
+
+        human_list[0].GetComponent<Human>().updateDepthData(camera_number, depthData);
+        udpateHumanPose();
+    }
+
+    public void scale_depth(float f)
+    {
+        human_list[0].GetComponent<Human>().setDepthScale(test_slider.value);
     }
 
     public void udpateHumanPose()
     {
-        human_list[0].GetComponent<Human>().udpateHumanPose();
+        human_list[0].GetComponent<Human>().updateHumanPose2D();
+        //human_list[0].GetComponent<Human>().updateHumanPose3D();
     }
 }
