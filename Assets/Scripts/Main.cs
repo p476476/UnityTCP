@@ -8,12 +8,17 @@ public class Main : MonoBehaviour {
     public static Main instance;
     public const int camera_count=1;
 
+    //current system support only one human
     public List<GameObject> human_list;
     public GameObject human_prefeb;
 
-    public Slider test_slider;
+    //record real cameras position and direction
+    public Transform[] cameras;
 
     public Dictionary<string, int> track_data_index = new Dictionary<string, int>();
+
+
+    public Slider test_slider;
 
     private void Awake()
     {

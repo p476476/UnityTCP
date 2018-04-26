@@ -10,6 +10,7 @@ public class Human : MonoBehaviour {
 
     //2D joint data(pixel)        [cam1,cam2,cam3]
     Skeleton2D[] skeleton2D ;
+    int joint_count=14;
 
     //3D joint transform         [head, neck, Rsho, Relb, Rwri, Lsho, Lelb, Lwri, Rhip, Rkne, Rank, Lhip, Lkne, Lank]
     public Transform[] joints3D_transform;
@@ -152,7 +153,7 @@ public class Human : MonoBehaviour {
         if(useDepth0)
         {
             for (int i = 0; i < skeleton2D[0].depth_data.Length; i++)
-            {
+            { 
                 joints2D_transform0[i].localPosition = new Vector3(joints2D_transform0[i].localPosition.x, joints2D_transform0[i].localPosition.y, skeleton2D[0].depth_data[i]);
             }
         }
@@ -175,6 +176,27 @@ public class Human : MonoBehaviour {
 
     public void updateHumanPose3D()
     {
+        int camera_count = Main.instance.cameras.Length;
+        //score confidence for each 2d joint
+        float[,] confidence = new float[camera_count, joint_count];
+        Vector3[] cameras_pos = new Vector3[camera_count];
+        Vector3[] cameras_dir = new Vector3[camera_count];
+
+
+
+
+        //detect occlusiion
+        for(int i = 0; i < confidence.GetLength(0); i++)
+        {
+            for(int j=1;j<confidence.GetLength(1);j++)
+            {
+                
+            }
+        }
+
+
+
+        //only use high confidence 2d joint to fuse the 3d human skeleton model
         for (int i = 0; i < joints3D_transform.Length; i++)
         {
             joints3D_transform[i].localPosition = new Vector3(joints2D_transform0[i].localPosition.x, joints2D_transform1[i].localPosition.y, joints2D_transform1[i].localPosition.x);
