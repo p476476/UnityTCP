@@ -10,9 +10,17 @@ public class RealCamera : MonoBehaviour {
         depth_camera
     }
     public Type type;
+    public float fov=78;
+    public float proj_width = 0.32f;
+    public float proj_height = 0.24f;
+    public float proj_diatence = 0.2f;
+    public int pixel_width = 640;
+    public int pixel_height = 480;
 
-	// Use this for initialization
-	void Start () {
+
+
+    // Use this for initialization
+    void Start () {
 		
 	}
 	

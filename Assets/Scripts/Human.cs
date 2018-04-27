@@ -23,6 +23,7 @@ public class Human : MonoBehaviour {
 
     //limb in unity.         [[neck,head],[neck, Rsho] ......]
     int[,] limbs_index = new int[,] { { 1, 0 }, { 1, 2 }, { 2, 3 }, { 3, 4 }, { 1, 5 }, { 5, 6 }, { 6, 7 }, { 1, 8 }, { 8, 9 }, { 9, 10 }, { 1, 11 }, { 11, 12 }, { 12, 13 } };
+    float[] limbs_width = new float[] { 1, 1, 1, 11, 1, 1 };
     float depth_alpha = 0.5f;
 
     // Use this for initialization
@@ -179,29 +180,77 @@ public class Human : MonoBehaviour {
         int camera_count = Main.instance.cameras.Length;
         //score confidence for each 2d joint
         float[,] confidence = new float[camera_count, joint_count];
-        Vector3[] cameras_pos = new Vector3[camera_count];
-        Vector3[] cameras_dir = new Vector3[camera_count];
-
-
-
 
         //detect occlusiion
-        for(int i = 0; i < confidence.GetLength(0); i++)
+        for (int skele_i = 0; skele_i < skeleton2D.Length; skele_i++)
         {
-            for(int j=1;j<confidence.GetLength(1);j++)
+
+            RealCamera rcam = Main.instance.cameras[skele_i].GetComponent<RealCamera>();
+
+            for (int limb_i = 0; limb_i < limbs_index.GetLength(0); limb_i++)
             {
-                
+                for (int joint_i = 0; joint_i < skeleton2D[skele_i].joint_position.Length; joint_i++)
+                {
+                    float proj_limb_w = limbs_width[limb_i] * rcam.proj_diatence / Vector3.Distance(joints3D_transform[joint_i].position, rcam.transform.position);
+                    int pixel_limb_w = (int)((proj_limb_w / rcam.proj_width) * rcam.pixel_width);
+                    Vector3 pixel_limb_0 = skeleton2D[skele_i].joint_position[limbs_index[limb_i, 0]];
+                    Vector3 pixel_limb_1 = skeleton2D[skele_i].joint_position[limbs_index[limb_i, 1]];
+                    Vector3 pixel_joint_i = skeleton2D[skele_i].joint_position[joint_i];
+                    Vector3 normal_limb_v = Vector3.Normalize(pixel_limb_1 - pixel_limb_0);
+                    Vector3 normal_limb_w_v = new Vector3(normal_limb_v[1], normal_limb_v[0], 0);
+                    if (Vector3.Dot(normal_limb_v, pixel_joint_i - pixel_limb_0) < Vector3.Distance(pixel_limb_1, pixel_limb_0) &&
+                        Vector3.Dot(normal_limb_v, pixel_joint_i - pixel_limb_0) > 0 &&
+                        Mathf.Abs(Vector3.Dot(normal_limb_w_v, pixel_joint_i - pixel_limb_0)) < pixel_limb_w &&
+                        Vector3.Distance(joints3D_transform[joint_i].position, rcam.transform.position) > Vector3.Distance(joints3D_transform[limbs_index[limb_i, 0]].position, rcam.transform.position))
+
+                    {
+                        confidence[skele_i, joint_i] = 1;
+
+                    }
+                    else
+                    {
+                        confidence[skele_i, joint_i] = 0;
+                    }
+                }
+            }
+
+
+        }
+
+
+
+        Vector3[] final_position = new Vector3[joint_count];
+        float[] totoal_confidence = new float[joint_count];
+        //only use high confidence 2d joint to fuse the 3d human skeleton model
+        for (int skele_i = 0; skele_i < skeleton2D.Length; skele_i++)
+        {
+
+            RealCamera rcam = Main.instance.cameras[skele_i].GetComponent<RealCamera>();
+            Vector3[] nor_joints_position = skeleton2D[skele_i].getNormalizeJointsPosition();
+
+            for (int joint_i = 0; joint_i < skeleton2D[skele_i].joint_position.Length; joint_i++)
+            {
+
+                Vector3 proj_joint = rcam.transform.position + rcam.transform.forward * rcam.proj_diatence + rcam.transform.right * rcam.proj_width * (0.5f - nor_joints_position[joint_i].x) + rcam.transform.up * rcam.proj_height * (0.5f - nor_joints_position[joint_i].y);
+                Vector3 vec1 = proj_joint - rcam.transform.position;
+                Vector3 vec2 = joints3D_transform[joint_i].position - rcam.transform.position;
+
+                Vector3 new_pos = rcam.transform.position + Vector3.Project(vec2, vec1);
+                final_position[joint_i] += new_pos * confidence[skele_i, joint_i];
+                totoal_confidence[joint_i] += confidence[skele_i, joint_i];
+
+
+                //joints3D_transform[i].localPosition = new Vector3(joints2D_transform0[i].localPosition.x, joints2D_transform1[i].localPosition.y, joints2D_transform1[i].localPosition.x);
             }
         }
 
-
-
-        //only use high confidence 2d joint to fuse the 3d human skeleton model
-        for (int i = 0; i < joints3D_transform.Length; i++)
+        for (int joint_i = 0; joint_i < skeleton2D[0].joint_position.Length; joint_i++)
         {
-            joints3D_transform[i].localPosition = new Vector3(joints2D_transform0[i].localPosition.x, joints2D_transform1[i].localPosition.y, joints2D_transform1[i].localPosition.x);
+            joints3D_transform[joint_i].localPosition = final_position[joint_i] / totoal_confidence[joint_i]; 
         }
+        for(int i=0;i < skeleton2D[0].joint_position.Length; i++)
+        {
 
-
+        }
     }
 }
